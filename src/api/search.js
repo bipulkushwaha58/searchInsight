@@ -1,7 +1,7 @@
 import { searchClient } from "./axiosClient";
 
 const urls = {
-  keyword: "/keyword_search",
+  keyword: "/keyword_searc",
   vector: "/vector_text_search",
   textToImage: "/text_to_image",
   imageToImage: "/image_to_image",

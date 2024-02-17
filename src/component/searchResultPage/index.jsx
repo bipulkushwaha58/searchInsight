@@ -263,6 +263,7 @@ export default function SearchPage() {
     if (apiCall) {
       setApiCall(false);
       fetchSearchResult();
+      setSearchResult(data);
     }
   }, [apiCall]);
   return (
