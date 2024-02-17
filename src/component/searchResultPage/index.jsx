@@ -231,22 +231,33 @@ const data = {
 
 export default function SearchPage() {
   const childRef = useRef();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [open, setOpen] = useState(false);
   const [attributes, setAttributes] = useState({});
   const [query, setQuery] = useState(null);
   const [searchType, setSearchType] = useState("keyword");
   const [apiCall, setApiCall] = useState(false);
-  const [searchResult, setSearchResult] = useState(data);
+  const [searchResult, setSearchResult] = useState({});
 
   const handleClick = (item) => {
     setAttributes(item);
     setOpen(!open);
   };
   const fetchSearchResult = () => {
-    searchAPI.query(query, searchType).then((res) => {
-      // console.log(res)
-      setSearchResult(data);
-    });
+    setLoading(true);
+    searchAPI
+      .query(query, searchType)
+      .then((res) => {
+        console.log(res.data.data);
+        setLoading(false);
+        // setSearchResult(res.data.data);
+        setSearchResult(data);
+      })
+      .catch((error) => {
+        setError(true);
+        setLoading(false);
+      });
   };
   useEffect(() => {
     if (apiCall) {
@@ -254,31 +265,37 @@ export default function SearchPage() {
       fetchSearchResult();
     }
   }, [apiCall]);
-
-  console.log("query", query);
-  console.log("select", searchType);
-  console.log("apiCall", apiCall);
   return (
     <>
-      <Navbar
-        setQuery={setQuery}
-        setApiCall={setApiCall}
-        setSearchType={setSearchType}
-      />
-      <div class="bg-slate-200 flex flex-col h-[calc(100vh-5rem)] overflow-auto ">
-        <div class="pt-2 pl-10 text-[#874439] text-lg">
-          Total Hits - {searchResult.hits?.length}
-        </div>
-        <Modal open={open} setOpen={setOpen} jsonData={attributes} />
+      <>
+        <Navbar
+          setQuery={setQuery}
+          setApiCall={setApiCall}
+          setSearchType={setSearchType}
+        />
+        {loading ? (
+          <div class="bg-slate-200 text-[#874439] font-semibold text-lg flex justify-center items-center h-lvh">
+            loading...
+          </div>
+        ) : (
+          <div class="bg-slate-200 flex flex-col h-[calc(100vh-5rem)] overflow-auto ">
+            {searchResult?.hits && (
+              <div class="pt-2 pl-10 text-[#874439] text-lg">
+                Total Hits - {searchResult?.hits?.length}
+              </div>
+            )}
+            <Modal open={open} setOpen={setOpen} jsonData={attributes} />
 
-        <div class="flex flex-wrap items-center justify-center pb-8 ">
-          {searchResult.hits?.map((item, i) => (
-            <div key={i} class="p-4" onClick={() => handleClick(item)}>
-              <ProductCard image={item.images} name={item.product_name} />
+            <div class="flex flex-wrap items-center justify-center pb-8 ">
+              {searchResult?.hits?.map((item, i) => (
+                <div key={i} class="p-4" onClick={() => handleClick(item)}>
+                  <ProductCard image={item.images} name={item.product_name} />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        )}
+      </>
     </>
   );
 }
